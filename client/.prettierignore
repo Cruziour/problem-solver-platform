@@ -1,0 +1,25 @@
+/node_modules
+.env
+*.log
+
+# ----------------------------
+# Frontend (React) Exclusions
+# ----------------------------
+/build          # Standard output for production React builds
+/dist           # Alternative output for builds
+/public         # Static assets that should not be formatted
+
+# ----------------------------
+# Backend (Node/Express) Exclusions
+# ----------------------------
+# If you compile your server-side code (e.g., from TypeScript/ESM to CJS):
+/out
+/lib
+
+# MongoDB-related (If stored locally or in project files)
+*.sqlite
+*.db
+*.mdb
+
+# Common testing/coverage reports
+/coverage
