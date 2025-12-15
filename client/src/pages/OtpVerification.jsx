@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { MailCheck, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthBackground, Toast } from '../components/index';
+import { validateOtpService } from '../services';
 
 const OtpVerification = () => {
   const navigate = useNavigate();
@@ -58,19 +59,33 @@ const OtpVerification = () => {
     setLoading(true);
 
     try {
-      // BACKEND API CALL
-      // await axios.post("/api/auth/verify-otp", {
-      //   otp: otp.join(""),
-      // });
+      const hash = localStorage.getItem('hash');
+      const expires = localStorage.getItem('expires');
+      const email = localStorage.getItem('email');
+      const payload = {
+        otp: otp.join(''),
+        hash,
+        email,
+        expires,
+      };
 
-      setTimeout(() => {
+      const response = await validateOtpService(payload);
+      if (!response.success) {
         setToast({
           open: true,
-          type: 'success',
-          message: 'OTP verified successfully',
+          type: 'error',
+          message: 'Otp validation failed.',
         });
-
-        setLoading(false);
+        return;
+      }
+      setToast({
+        open: true,
+        type: 'success',
+        message: 'OTP verified successfully',
+      });
+      localStorage.clear();
+      setLoading(false);
+      setTimeout(() => {
         navigate('/login'); // or /dashboard
       }, 2000);
     } catch (error) {
@@ -79,15 +94,8 @@ const OtpVerification = () => {
         type: 'error',
         message: error.message,
       });
-
       setLoading(false);
       alert('Invalid OTP');
-    } finally {
-      setToast({
-        open: true,
-        type: 'warning',
-        message: 'OTP expired',
-      });
     }
   };
 

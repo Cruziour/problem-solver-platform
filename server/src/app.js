@@ -19,9 +19,11 @@ app.use(cookieParser());
 
 // import routes
 import healthCheck from './controllers/healthCheck.controller.js';
+import userRouter from './routes/user.routes.js';
 
 // routes
 app.get('/healthcheck', healthCheck);
+app.use('/api/v1/user', userRouter);
 
 // import error routes
 import errorHandler from './middlewares/error.middleware.js';

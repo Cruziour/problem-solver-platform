@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { AuthBackground, Toast } from '../components/index';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { registerUserAndSendOtpService } from '../services';
 
 const Signup = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -18,26 +19,56 @@ const Signup = () => {
   });
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      console.log(email, password, confirmPassword, name);
-      setIsSubmitting(true);
+    if (
+      [name, password, confirmPassword, email].some(
+        (fields) => !fields || fields === '',
+      )
+    ) {
       setToast({
-        open: false,
-        type: 'success',
-        message: '',
+        open: true,
+        type: 'error',
+        message: 'All fields are required to fill.',
       });
-      setTimeout(() => {
+      return;
+    }
+    if (password !== confirmPassword) {
+      setToast({
+        open: true,
+        type: 'error',
+        message: 'Password and Confirm Password not match.',
+      });
+      return;
+    }
+    const payload = {
+      name,
+      email,
+      password,
+      confirmPassword,
+    };
+    try {
+      setIsSubmitting(true);
+      const response = await registerUserAndSendOtpService(payload);
+      if (!response?.data?.hash || !response?.data?.expires) {
         setToast({
           open: true,
-          type: 'success',
-          message: 'OTP send Successfully.',
+          type: 'error',
+          message: 'Invalid server response during OTP send.',
         });
-        setTimeout(() => {
-          navigate('/verifyOtp');
-        }, 3000);
-      }, 2000);
+        return;
+      }
+      localStorage.setItem('email', response?.data?.email);
+      localStorage.setItem('hash', response?.data?.hash);
+      localStorage.setItem('expires', response?.data?.expires);
+      setToast({
+        open: true,
+        type: 'success',
+        message: 'OTP send Successfully.',
+      });
+      setTimeout(() => {
+        navigate('/verifyOtp');
+      }, 3000);
     } catch (error) {
       setToast({
         open: true,
@@ -175,7 +206,11 @@ const Signup = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                   className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-blue-500"
                 >
-                  {showConfirmPassword ? <Eye size={20} /> : <EyeOff size={20} />}
+                  {showConfirmPassword ? (
+                    <Eye size={20} />
+                  ) : (
+                    <EyeOff size={20} />
+                  )}
                 </button>
               </div>
             </div>

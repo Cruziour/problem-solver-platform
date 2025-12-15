@@ -1,1 +1,1 @@
-DB_Name='promblemSolver'
+export const DB_Name='promblemSolver'
