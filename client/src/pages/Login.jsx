@@ -1,15 +1,42 @@
 import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
+import { Toast } from '../components/index';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState({
+    open: false,
+    type: 'success',
+    message: '',
+  });
 
   const handleSubmit = (e) => {
-    e.preventDefault()
-    console.log(`email ${email} password ${password} on a loging page.`);
+    e.preventDefault();
+    try {
+      setIsSubmitting(true);
+      setTimeout(() => {
+        console.log(`email ${email} password ${password} on a loging page.`);
+        setToast({
+          open: true,
+          type: 'success',
+          message: 'Login Succcessfully',
+        });
+
+        // navigate('/login'); // or /dashboard
+        setIsSubmitting(false)
+      }, 2000);
+    } catch (error) {
+      setIsSubmitting(false)
+      setToast({
+        open: true,
+        type: 'error',
+        message: error.message,
+      });
+    }
   };
 
   return (
@@ -59,9 +86,10 @@ const Login = () => {
                 type="email"
                 id="email"
                 value={email}
-                autoComplete='email'
+                autoComplete="email"
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
+                disabled={isSubmitting}
                 className="w-full px-4 py-2 bg-[#050816] border border-gray-600 rounded-lg focus:outline-none focus:border-blue-500"
               />
             </div>
@@ -77,10 +105,11 @@ const Login = () => {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  autoComplete='current-password'
+                  autoComplete="current-password"
                   onChange={(e) => setPassword(e.target.value)}
                   placeholder="Enter your password"
                   required
+                  disabled={isSubmitting}
                   className="w-full px-4 py-3 pr-12 rounded-lg bg-black/40 border border-white/10 text-white focus:outline-none focus:ring-2 focus:ring-blue-600"
                 />
 
@@ -94,7 +123,7 @@ const Login = () => {
               </div>
             </div>
             <button className="w-full bg-blue-600 mt-8 hover:bg-blue-700 transition rounded-lg py-2 font-semibold">
-              Login
+              {isSubmitting ? 'Processing...' : 'Login'}
             </button>
           </form>
 
@@ -119,6 +148,12 @@ const Login = () => {
           </p>
         </div>
       </div>
+      <Toast
+        isOpen={toast.open}
+        type={toast.type}
+        message={toast.message}
+        onClose={() => setToast({ ...toast, open: false })}
+      />
     </div>
   );
 };

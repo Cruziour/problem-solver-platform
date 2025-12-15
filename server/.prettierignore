@@ -1,0 +1,27 @@
+/node_modules
+
+# Build/Output Directories
+/dist
+/build
+/out
+
+# Runtime data
+/tmp
+/logs
+
+# Configuration files (often generated or system-specific)
+.env
+.env.*
+.git
+.vscode
+*.log
+package-lock.json
+yarn.lock
+
+# Database specific files
+*.sqlite
+*.db
+
+# Other common backend files to ignore
+# If you are using Mongoose/TypeORM models, you might need to adjust this
+# but generally, keep generated files out.

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import AuthBackground from '../components/AuthBackground';
+import { AuthBackground, Toast } from '../components/index';
 import { Eye, EyeOff } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 
@@ -11,15 +11,40 @@ const Signup = () => {
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [name, setName] = useState('');
+  const [toast, setToast] = useState({
+    open: false,
+    type: 'success',
+    message: '',
+  });
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(email, password, confirmPassword, name);
-    setTimeout(() => {
-      navigate('/verifyOtp');
-    }, 2000);
-    setIsSubmitting(true);
+    try {
+      console.log(email, password, confirmPassword, name);
+      setIsSubmitting(true);
+      setToast({
+        open: false,
+        type: 'success',
+        message: '',
+      });
+      setTimeout(() => {
+        setToast({
+          open: true,
+          type: 'success',
+          message: 'OTP send Successfully.',
+        });
+        setTimeout(() => {
+          navigate('/verifyOtp');
+        }, 3000);
+      }, 2000);
+    } catch (error) {
+      setToast({
+        open: true,
+        type: 'error',
+        message: error.message,
+      });
+    }
   };
 
   return (
@@ -161,7 +186,7 @@ const Signup = () => {
               disabled={isSubmitting}
               className="w-full mt-6 py-3 rounded-lg bg-linear-to-r from-blue-500 to-indigo-600 text-white font-semibold tracking-wide disabled:opacity-60"
             >
-              Sign Up
+              {isSubmitting ? 'Processing...' : 'Sign Up'}
             </button>
           </form>
 
@@ -172,6 +197,12 @@ const Signup = () => {
             </Link>
           </p>
         </div>
+        <Toast
+          isOpen={toast.open}
+          type={toast.type}
+          message={toast.message}
+          onClose={() => setToast({ ...toast, open: false })}
+        />
       </div>
     </AuthBackground>
   );
