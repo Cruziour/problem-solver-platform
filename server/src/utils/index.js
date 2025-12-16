@@ -1,3 +1,4 @@
 export { ApiError } from './ApiError.js';
 export { ApiResponse } from './ApiResponse.js';
 export { asyncHandler } from './asynchandler.js';
+export { sendOTPEmail } from './sendOtpMail.js';

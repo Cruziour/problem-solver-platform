@@ -36,12 +36,18 @@ const signup = asyncHandler(async (req, res) => {
   }
 
   try {
+    const otpData = await generateAndHashOtpServices(email);
+    if (!otpData) {
+      throw new ApiError(
+        500,
+        'Something went wrong while otp sending on your email.',
+      );
+    }
     const user = await User.create({
       name,
       email: email.toLowerCase().trim(),
       password,
     });
-    const otpData = generateAndHashOtpServices(email);
     if (!user || !user?._id) {
       throw new Error('Mongoose failed to create user document.');
     }
@@ -75,7 +81,10 @@ const resendOtp = asyncHandler(async (req, res) => {
     if (!user) {
       throw new ApiError(402, 'User not found');
     }
-    const otpData = generateAndHashOtpServices(email);
+    const otpData = await generateAndHashOtpServices(email);
+    if (!otpData) {
+      throw new ApiError(500, 'Some server problem');
+    }
     return res
       .status(200)
       .json(

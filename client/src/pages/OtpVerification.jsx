@@ -9,7 +9,7 @@ const OtpVerification = () => {
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
   const [resendLoading, setResendLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(10); // 5 min = 300 sec
+  const [timeLeft, setTimeLeft] = useState(300); // 5 min = 300 sec
   const [toast, setToast] = useState({
     open: false,
     type: 'success',
