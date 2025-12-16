@@ -1,4 +1,4 @@
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Toast } from '../components/index';
@@ -12,6 +12,7 @@ import {
 
 const Login = () => {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -50,7 +51,7 @@ const Login = () => {
         });
         setEmail('');
         setPassword('');
-        // navigate('/login'); // or /dashboard
+        navigate('/dashboard'); // or /dashboard
         setIsSubmitting(false);
       }, 2000);
     } catch (error) {
