@@ -2,8 +2,16 @@ import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Toast } from '../components/index';
+import { loginService } from '../services';
+import { useDispatch } from 'react-redux';
+import {
+  setAccessToken,
+  setAuth,
+  setRefreshToken,
+} from '../redux/slice/authSlice';
 
 const Login = () => {
+  const dispatch = useDispatch();
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -14,23 +22,39 @@ const Login = () => {
     message: '',
   });
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
       setIsSubmitting(true);
+      const response = await loginService({ email, password });
+      if (!response.success) {
+        setToast({
+          open: true,
+          type: 'error',
+          message: 'Something went wrong while login.',
+        });
+      }
+      const user = response?.data?.user;
+      const refreshToken = response?.data?.user.refreshToken;
+      const accessToken = response?.data?.accessToken;
+
+      dispatch(setAuth({ user }));
+      dispatch(setAccessToken({ accessToken }));
+      dispatch(setRefreshToken({ refreshToken }));
+
       setTimeout(() => {
-        console.log(`email ${email} password ${password} on a loging page.`);
         setToast({
           open: true,
           type: 'success',
           message: 'Login Succcessfully',
         });
-
+        setEmail('');
+        setPassword('');
         // navigate('/login'); // or /dashboard
-        setIsSubmitting(false)
+        setIsSubmitting(false);
       }, 2000);
     } catch (error) {
-      setIsSubmitting(false)
+      setIsSubmitting(false);
       setToast({
         open: true,
         type: 'error',

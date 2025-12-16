@@ -2,13 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { MailCheck, Loader2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { AuthBackground, Toast } from '../components/index';
-import { validateOtpService } from '../services';
+import { resendOtpService, validateOtpService } from '../services';
 
 const OtpVerification = () => {
   const navigate = useNavigate();
   const [otp, setOtp] = useState(['', '', '', '', '', '']);
+  const [resendLoading, setResendLoading] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(300); // 5 min = 300 sec
+  const [timeLeft, setTimeLeft] = useState(10); // 5 min = 300 sec
   const [toast, setToast] = useState({
     open: false,
     type: 'success',
@@ -20,11 +21,9 @@ const OtpVerification = () => {
   /* ================= TIMER ================= */
   useEffect(() => {
     if (timeLeft <= 0) return;
-
     const timer = setInterval(() => {
-      setTimeLeft((prev) => prev - 1);
+      setTimeLeft((t) => t - 1);
     }, 1000);
-
     return () => clearInterval(timer);
   }, [timeLeft]);
 
@@ -37,14 +36,10 @@ const OtpVerification = () => {
   /* ================= OTP INPUT ================= */
   const handleChange = (value, index) => {
     if (!/^\d?$/.test(value)) return;
-
     const newOtp = [...otp];
     newOtp[index] = value;
     setOtp(newOtp);
-
-    if (value && index < 5) {
-      inputsRef.current[index + 1].focus();
-    }
+    if (value && index < 5) inputsRef.current[index + 1].focus();
   };
 
   const handleKeyDown = (e, index) => {
@@ -86,6 +81,7 @@ const OtpVerification = () => {
       localStorage.clear();
       setLoading(false);
       setTimeout(() => {
+        setOtp(['', '', '', '', '', '']);
         navigate('/login'); // or /dashboard
       }, 2000);
     } catch (error) {
@@ -96,6 +92,36 @@ const OtpVerification = () => {
       });
       setLoading(false);
       alert('Invalid OTP');
+    }
+  };
+
+  const handleResendOtp = async () => {
+    try {
+      setResendLoading(true);
+      const email = localStorage.getItem('email');
+
+      const res = await resendOtpService({ email });
+
+      localStorage.setItem('hash', res?.data.hash);
+      localStorage.setItem('expires', res?.data.expires);
+      localStorage.setItem('email', res?.data?.email);
+      setToast({
+        open: true,
+        type: 'success',
+        message: 'Otp sent on your email.',
+      });
+      setOtp(['', '', '', '', '', '']);
+      inputsRef.current[0].focus();
+      setTimeLeft(300);
+    } catch (err) {
+      setToast({
+        open: true,
+        type: 'error',
+        message: err.message,
+      });
+    } finally {
+      setOtp(['', '', '', '', '', '']);
+      setResendLoading(false);
     }
   };
 
@@ -161,10 +187,15 @@ const OtpVerification = () => {
 
           <div className="text-center mt-4">
             <button
-              disabled={loading}
-              className="text-sm text-blue-400 hover:text-blue-300 transition"
+              disabled={timeLeft > 0 || resendLoading}
+              onClick={handleResendOtp}
+              className={`text-sm ${
+                timeLeft > 0
+                  ? 'text-gray-500 cursor-not-allowed'
+                  : 'text-blue-400'
+              }`}
             >
-              Resend OTP
+              {resendLoading ? 'Resending...' : 'Resend OTP'}
             </button>
           </div>
         </div>

@@ -65,6 +65,34 @@ const signup = asyncHandler(async (req, res) => {
   }
 });
 
+const resendOtp = asyncHandler(async (req, res) => {
+  const { email } = req.body;
+  if (!email) {
+    throw new ApiError(401, 'Please provide email');
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new ApiError(402, 'User not found');
+    }
+    const otpData = generateAndHashOtpServices(email);
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          201,
+          otpData,
+          'OTP sent successfully. Please verify your email.',
+        ),
+      );
+  } catch (error) {
+    if (error.name === 'ValidationError') {
+      throw new ApiError(400, 'Otp resend problem.');
+    }
+    throw new ApiError(500, error.message);
+  }
+});
+
 const validateOtp = asyncHandler(async (req, res) => {
   const { email, hash, expires, otp } = req.body;
   if (
@@ -106,4 +134,58 @@ const validateOtp = asyncHandler(async (req, res) => {
   }
 });
 
-export { signup, validateOtp };
+const login = asyncHandler(async (req, res) => {
+  const { email, password } = req.body;
+  if ([email, password].some((f) => !f || f.trim() === '')) {
+    throw new ApiError(401, 'email and password is required.');
+  }
+  try {
+    const user = await User.findOne({ email });
+    if (!user) {
+      throw new ApiError(404, 'User not found');
+    }
+    const isMatchedPassword = await user.isPasswordCorrect(password);
+    if (!isMatchedPassword) {
+      throw new ApiError(401, 'Incorrect Password.');
+    }
+    const accessToken = await generateAccessAndRefreshToken(user?._id);
+    const userData = await User.findById(user?._id).select('-password');
+    if (!userData) {
+      throw new ApiError(404, 'Something went wrong.');
+    }
+    return res
+      .status(200)
+      .json(
+        new ApiResponse(
+          200,
+          { user: userData, accessToken },
+          'User logged successfully.',
+        ),
+      );
+  } catch (error) {
+    throw new ApiError(500, error.message);
+  }
+});
+
+const logout = asyncHandler(async (req, res) => {
+  const userId = req?.user?._id;
+  if (!userId) {
+    throw new ApiError(401, 'Unauthorized.');
+  }
+  try {
+    const user = await User.findById(userId);
+    if (!user) {
+      throw new ApiError(404, 'User not found.');
+    }
+    // Clear refresh token
+    user.refreshToken = null;
+    await user.save({ validateBeforeSave: false });
+    return res
+      .status(200)
+      .json(new ApiResponse(200, null, 'User logged out successfully'));
+  } catch (error) {
+    throw new ApiError(403, error.message);
+  }
+});
+
+export { signup, validateOtp, login, logout, resendOtp };

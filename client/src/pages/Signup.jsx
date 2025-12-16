@@ -67,6 +67,10 @@ const Signup = () => {
         message: 'OTP send Successfully.',
       });
       setTimeout(() => {
+        setEmail('');
+        setName('');
+        setPassword('');
+        setConfirmPassword('');
         navigate('/verifyOtp');
       }, 3000);
     } catch (error) {
