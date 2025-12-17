@@ -5,39 +5,29 @@ import {
   RouterProvider,
 } from 'react-router-dom';
 import { Navigate } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 import {
+  AdminDashboard,
   Landing,
   Layout,
   Login,
+  MyComplaints,
   OtpVerification,
   Signup,
+  SolverDashboard,
+  SubAdminDashboard,
+  UserDashboard,
 } from './pages/index.js';
 import DashboardLayout from './components/Dashboard/DashboardLayout.jsx';
-import UserDashboard from './pages/UserDashboard.jsx';
-import SolverDashboard from './pages/SolverDashboard.jsx';
-import SubAdminDashboard from './pages/SubAdminDashboard.jsx';
-import AdminDashboard from './pages/AdminDashboard.jsx';
-import MyComplaints from './pages/MyComplaints.jsx';
-
-const useAuth = () => {
-  // In a real app, this would get user info and token from Redux store
-  const user = {
-    id: '1',
-    name: 'Test User',
-    role: 'SUB_ADMIN', // Change this to test different roles: 'USER', 'SOLVER', 'SUB_ADMIN', 'ADMIN'
-  };
-  return { isAuthenticated: !!user, user };
-};
 
 const ProtectedRoute = ({ children, allowedRoles }) => {
-  const { isAuthenticated, user } = useAuth();
+  const { user, isAuth } = useSelector((state) => state.auth);
 
-  if (!isAuthenticated) {
+  if (!isAuth) {
     return <Navigate to="/login" replace />;
   }
 
   if (allowedRoles && !allowedRoles.includes(user.role)) {
-    // Redirect to a dashboard the user is allowed to access, or a 403 page
     return <Navigate to="/unauthorized" replace />;
   }
 
@@ -45,7 +35,7 @@ const ProtectedRoute = ({ children, allowedRoles }) => {
 };
 
 function App() {
-  // Determine which dashboard to show based on role
+  const { user } = useSelector((state) => state.auth);
   const getDashboardComponent = (role) => {
     switch (role) {
       case 'USER':
@@ -60,7 +50,6 @@ function App() {
         return <Navigate to="/login" replace />; // Should not happen if auth is correct
     }
   };
-  const { user } = useAuth(); // Get current user role
   const router = createBrowserRouter(
     createRoutesFromElements(
       <Route path="/" element={<Layout />}>
@@ -74,16 +63,22 @@ function App() {
             <ProtectedRoute
               allowedRoles={['USER', 'SOLVER', 'SUB_ADMIN', 'ADMIN']}
             >
-              {getDashboardComponent(user.role)}
+              <DashboardLayout>
+                {getDashboardComponent(user?.role)}
+              </DashboardLayout>
             </ProtectedRoute>
           }
         />
         <Route
           path="/myComplaints"
           element={
-            <DashboardLayout>
-              <MyComplaints />
-            </DashboardLayout>
+            <ProtectedRoute
+              allowedRoles={['USER', 'SOLVER', 'SUB_ADMIN', 'ADMIN']}
+            >
+              <DashboardLayout>
+                <MyComplaints />
+              </DashboardLayout>
+            </ProtectedRoute>
           }
         />
       </Route>,

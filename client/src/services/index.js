@@ -56,3 +56,16 @@ export const resendOtpService = async (payload) => {
     throw error;
   }
 };
+
+export const logoutService = async () => {
+  try {
+    const { data } = await axiosInstance.get('/api/v1/user/logout');
+    return data;
+  } catch (error) {
+    console.error(
+      'logoutUserService error:',
+      error.response?.data || error.message,
+    );
+    throw error;
+  }
+};

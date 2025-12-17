@@ -10,12 +10,13 @@ import {
   FileText,
   Lock,
 } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
 // DUMMY CONFIG - Replace with actual role-based config loaded from Redux
 const navConfig = {
   USER: [
-    { name: 'Dashboard', path: '/', icon: LayoutDashboard },
-    { name: 'My Complaints', path: '/my-complaints', icon: FileText },
+    { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
+    { name: 'My Complaints', path: '/myComplaints', icon: FileText },
     { name: 'Profile', path: '/profile', icon: User },
   ],
   SOLVER: [
@@ -36,24 +37,16 @@ const navConfig = {
   ],
 };
 
-// Assume the current user role is fetched from Auth context/Redux
-const useAuth = () => ({
-  user: {
-    role: 'ADMIN', // Change this to test different roles
-  },
-});
-
-const Sidebar = () => {
-  const { user } = useAuth();
-  const currentNavItems = navConfig[user.role] || navConfig.USER;
+const Sidebar = ({ handleLogout }) => {
+  const { user } = useSelector((state) => state.auth);
+  const currentNavItems = navConfig[user?.role] || navConfig.USER;
 
   const commonItems = [
     { name: 'Change Password', path: '/change-password', icon: Lock },
     {
       name: 'Logout',
-      path: '/logout',
       icon: LogOut,
-      action: () => alert('Logging out...'),
+      action: () => handleLogout(),
     },
   ];
 

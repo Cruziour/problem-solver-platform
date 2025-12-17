@@ -1,9 +1,9 @@
 import { Link, useNavigate } from 'react-router-dom';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Eye, EyeOff } from 'lucide-react';
 import { Toast } from '../components/index';
 import { loginService } from '../services';
-import { useDispatch } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
 import {
   setAccessToken,
   setAuth,
@@ -17,6 +17,7 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isAuth } = useSelector((state) => state.auth);
   const [toast, setToast] = useState({
     open: false,
     type: 'success',
@@ -42,18 +43,14 @@ const Login = () => {
       dispatch(setAuth({ user }));
       dispatch(setAccessToken({ accessToken }));
       dispatch(setRefreshToken({ refreshToken }));
-
-      setTimeout(() => {
-        setToast({
-          open: true,
-          type: 'success',
-          message: 'Login Succcessfully',
-        });
-        setEmail('');
-        setPassword('');
-        navigate('/dashboard'); // or /dashboard
-        setIsSubmitting(false);
-      }, 2000);
+      setToast({
+        open: true,
+        type: 'success',
+        message: 'Login Succcessfully',
+      });
+      setEmail('');
+      setPassword('');
+      setIsSubmitting(false);
     } catch (error) {
       setIsSubmitting(false);
       setToast({
@@ -63,6 +60,16 @@ const Login = () => {
       });
     }
   };
+
+  useEffect(() => {
+    if (isAuth) {
+      const timer = setTimeout(() => {
+        navigate('/dashboard', { replace: true });
+      }, 1500);
+
+      return () => clearTimeout(timer);
+    }
+  }, [isAuth, navigate]);
 
   return (
     <div className="min-h-screen flex bg-linear-to-br from-[#050816] via-[#0b1120] to-[#020617] text-white relative overflow-hidden">

@@ -17,6 +17,6 @@ router.route('/validateOtp').post(validateOtp);
 router.route('/resend-otp').post(resendOtp);
 
 // secure routes
-router.route('/logout').post(verifyJwt, logout);
+router.route('/logout').get(verifyJwt, logout);
 
 export default router;

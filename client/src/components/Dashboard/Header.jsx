@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import socket from '../../utils/socket.js';
 import { Bell, LogOut, User } from 'lucide-react';
+import { useSelector } from 'react-redux';
 
-const Header = () => {
+const Header = ({ handleLogout }) => {
   const [notifications, setNotifications] = useState([]);
-  const user = { role: 'ADMIN' }; // Dummy: Replace with actual Redux user
+  const { user } = useSelector((state) => state.auth);
 
   useEffect(() => {
     // Listen for general system-wide notifications (for ADMINs)
@@ -62,7 +63,7 @@ const Header = () => {
       </button>
       <button
         className="text-red-400 hover:text-red-300 p-2 rounded-full hover:bg-red-400/10 transition duration-150"
-        onClick={() => alert('Logging Out...')}
+        onClick={() => handleLogout()}
       >
         <LogOut className="w-5 h-5" />
       </button>

@@ -3,3 +3,8 @@ export { default as Login } from './Login';
 export { default as Layout } from './Layout';
 export { default as Signup } from './Signup';
 export { default as OtpVerification } from './OtpVerification';
+export { default as MyComplaints } from './MyComplaints';
+export { default as SolverDashboard } from './SolverDashboard';
+export { default as SubAdminDashboard } from './SubAdminDashboard';
+export { default as AdminDashboard } from './AdminDashboard';
+export { default as UserDashboard } from './UserDashboard';
